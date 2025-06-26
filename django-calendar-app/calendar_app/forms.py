@@ -1,13 +1,7 @@
 from django import forms
-from .models import Client, Note, Person, Event, EventTag
+from .models import Client, Person, Event, EventTag
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
-
-
-class NoteForm(forms.ModelForm):
-    class Meta:
-        model = Note
-        fields = ['title', 'content']
 
 
 class ClientRegisterForm(forms.ModelForm):

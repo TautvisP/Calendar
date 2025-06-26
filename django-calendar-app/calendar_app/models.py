@@ -20,15 +20,6 @@ class Client(models.Model):
             EventTag.objects.create(client=instance, name='Reminder', color='#43a047', is_default=True)
             EventTag.objects.create(client=instance, name='Event', color='#fbc02d', is_default=True)
 
-class Note(models.Model):
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='notes')
-    title = models.CharField(max_length=100)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.title
     
 class Person(models.Model):
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='people')

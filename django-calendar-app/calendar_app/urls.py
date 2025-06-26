@@ -1,27 +1,28 @@
 from django.urls import path
-from django.contrib.auth.views import LogoutView
-from . import views
+from .views import (
+    PersonListView, PersonDetailView, PersonCreateView, EventCreateView, EventDetailView,
+    ClientRegisterView, ClientLoginView, CustomLogoutView,
+    ProfileView, TagListView, TagCreateView, TagEditView, TagDeleteView, CalendarView
+)
 
 urlpatterns = [
-    path('register/', views.client_register, name='client_register'),
-    path('login/', views.client_login, name='client_login'),
-    path('logout/', views.custom_logout, name='logout'),
+    path('register/', ClientRegisterView.as_view(), name='client_register'),
+    path('login/', ClientLoginView.as_view(), name='client_login'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
 
-    path('person/register/', views.register_person, name='register_person'),
-    path('people/', views.person_list, name='person_list'),
-    path('people/<int:person_id>/', views.person_detail, name='person_detail'),
+    path('person/register/', PersonCreateView.as_view(), name='register_person'),
+    path('people/', PersonListView.as_view(), name='person_list'),
+    path('people/<int:pk>/', PersonDetailView.as_view(), name='person_detail'),
 
-    path('event/create/', views.create_event, name='create_event'),
-    path('event/<int:event_id>/', views.event_detail, name='event_detail'),
+    path('event/create/', EventCreateView.as_view(), name='create_event'),
+    path('event/<int:pk>/', EventDetailView.as_view(), name='event_detail'),
 
-    path('profile/', views.profile_view, name='profile'),
-    path('tags/', views.tag_list, name='tag_list'),
-    path('tags/create/', views.tag_create, name='tag_create'),
-    path('tags/<int:tag_id>/edit/', views.tag_edit, name='tag_edit'),
-    path('tags/<int:tag_id>/delete/', views.tag_delete, name='tag_delete'),
+    path('profile/', ProfileView.as_view(), name='profile'),
+    path('tags/', TagListView.as_view(), name='tag_list'),
+    path('tags/create/', TagCreateView.as_view(), name='tag_create'),
+    path('tags/<int:pk>/edit/', TagEditView.as_view(), name='tag_edit'),
+    path('tags/<int:pk>/delete/', TagDeleteView.as_view(), name='tag_delete'),
 
+    path('calendar/', CalendarView.as_view(), name='calendar'),
 
-    path('notes/<int:client_id>/', views.client_notes, name='client_notes'),
-    path('notes/<int:client_id>/add/', views.add_note, name='add_note'),
-    path('calendar/', views.calendar_view, name='calendar'),
 ]
