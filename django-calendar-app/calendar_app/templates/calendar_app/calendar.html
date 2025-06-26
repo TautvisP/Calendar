@@ -1,0 +1,31 @@
+{% extends 'calendar_app/base.html' %}
+{% load static %}
+{% block content %}
+<h1>
+    <a href="?month={{ prev_month }}&year={{ prev_year }}">&lt;</a>
+    {{ month_name }} {{ year }}
+    <a href="?month={{ next_month }}&year={{ next_year }}">&gt;</a>
+</h1>
+<div class="calendar-container">
+    <div class="calendar-grid">
+        <!-- Day of week headers -->
+        {% for day_name in day_names %}
+            <div class="calendar-day calendar-header">{{ day_name }}</div>
+        {% endfor %}
+        {% for week in month_days %}
+            {% for day in week %}
+                <div class="calendar-day{% if not day.in_month %} other-month{% endif %}{% if day.date == today %} today{% endif %}">
+                    <div class="day-number">{{ day.day }}</div>
+                    <div class="day-notes">
+                        {% for note in day.notes %}
+                            <div class="note">{{ note.client.first_name }} {{ note.client.last_name }}</div>
+                        {% empty %}
+                            <div class="no-notes"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
