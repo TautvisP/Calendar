@@ -1,31 +1,45 @@
 {% extends 'calendar_app/base.html' %}
 {% load static %}
 {% block content %}
-<h1>
-    <a href="?month={{ prev_month }}&year={{ prev_year }}">&lt;</a>
-    {{ month_name }} {{ year }}
-    <a href="?month={{ next_month }}&year={{ next_year }}">&gt;</a>
-</h1>
+<div class="month-nav-desktop">
+    <h1>
+        <a href="?month={{ prev_month }}&year={{ prev_year }}">&lt;</a>
+        {{ month_name }} {{ year }}
+        <a href="?month={{ next_month }}&year={{ next_year }}">&gt;</a>
+    </h1>
+</div>
+
+<!-- Week navigation for mobile -->
+<div class="week-nav-mobile">
+    <a href="?month={{ month }}&year={{ year }}&week={{ prev_week }}">&lt; Prev week</a>
+    <span>{{ week_range_str }}</span>
+    <a href="?month={{ month }}&year={{ year }}&week={{ next_week }}">Next week &gt;</a>
+</div>
+
 <div class="calendar-container">
     <div class="calendar-grid">
-        <!-- Day of week headers -->
         {% for day_name in day_names %}
             <div class="calendar-day calendar-header">{{ day_name }}</div>
         {% endfor %}
         {% for week in month_days %}
-            {% for day in week %}
-                <div class="calendar-day{% if not day.in_month %} other-month{% endif %}{% if day.date == today %} today{% endif %}">
-                    <div class="day-number">{{ day.day }}</div>
-                    <div class="day-notes">
-                        {% for note in day.notes %}
-                            <div class="note">{{ note.client.first_name }} {{ note.client.last_name }}</div>
-                        {% empty %}
-                            <div class="no-notes"></div>
-                        {% endfor %}
-                    </div>
+    <div class="calendar-week{% if week.iso_week == week_num %} current-week{% endif %}">
+        {% for day in week.days %}
+            <div class="calendar-day{% if not day.in_month %} other-month{% endif %}{% if day.date == today %} today{% endif %}">
+                <div class="day-number">
+                    {{ day.day }}
+                    <span class="day-name-mobile">{{ day.date|date:"D" }}</span>
                 </div>
-            {% endfor %}
+                <div class="day-notes">
+                    {% for note in day.notes %}
+                        <div class="note">{{ note.client.first_name }} {{ note.client.last_name }}</div>
+                    {% empty %}
+                        <div class="no-notes"></div>
+                    {% endfor %}
+                </div>
+            </div>
         {% endfor %}
+    </div>
+{% endfor %}
     </div>
 </div>
 {% endblock %}

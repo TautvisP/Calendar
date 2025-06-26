@@ -42,10 +42,11 @@ def calendar_view(request):
     today = timezone.now().date()
     year = int(request.GET.get('year', today.year))
     month = int(request.GET.get('month', today.month))
-    day_names = list(calendar.day_abbr)  # ['Mon', 'Tue', 'Wed', ...]
+    week_num = int(request.GET.get('week', today.isocalendar()[1]))
 
     cal = calendar.Calendar(firstweekday=0)
     month_days = []
+    week_list = []
     for week in cal.monthdatescalendar(year, month):
         week_days = []
         for day in week:
@@ -56,15 +57,31 @@ def calendar_view(request):
                 'in_month': day.month == month,
                 'notes': notes,
             })
-        month_days.append(week_days)
+        iso_week = week[0].isocalendar()[1]
+        is_current_week = iso_week == week_num
+        month_days.append({'days': week_days, 'is_current_week': is_current_week, 'iso_week': iso_week})
+        week_list.append(iso_week)
 
-    # Calculate previous and next month/year
+    # Week navigation
+    week_list = sorted(set(week_list))
+    if week_num not in week_list:
+        week_num = week_list[0]
+    week_idx = week_list.index(week_num)
+    prev_week = week_list[week_idx - 1] if week_idx > 0 else week_list[0]
+    next_week = week_list[week_idx + 1] if week_idx < len(week_list) - 1 else week_list[-1]
+
+    current_week_obj = next((w for w in month_days if w['iso_week'] == week_num), month_days[0])
+    first_day = current_week_obj['days'][0]['date']
+    last_day = current_week_obj['days'][-1]['date']
+    week_range_str = f"{first_day.strftime('%B')} {first_day.day}-{last_day.day}"
+
+
+    # Month navigation for desktop
     prev_month = month - 1 if month > 1 else 12
     prev_year = year if month > 1 else year - 1
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1
 
-    # Day names
     day_names = list(calendar.day_abbr)
 
     return render(request, 'calendar_app/calendar.html', {
@@ -78,9 +95,11 @@ def calendar_view(request):
         'next_year': next_year,
         'month_name': calendar.month_name[month],
         'day_names': day_names,
-        'day_names': day_names,
+        'week_num': week_num,
+        'prev_week': prev_week,
+        'next_week': next_week,
+        'week_range_str': week_range_str,
     })
-
 
 # Account registration and login views
 def client_register(request):
