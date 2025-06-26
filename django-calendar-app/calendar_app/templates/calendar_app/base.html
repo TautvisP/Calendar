@@ -17,10 +17,20 @@
                     <li>
                         <a href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
                     </li>
+                    <li>
+                        <a href="{% url 'register_person' %}" class="btn btn-primary">Register Person</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'create_event' %}" class="btn btn-primary">Create Event</a>
+                    </li>
+                        
                 {% else %}
                     <li><a href="{% url 'client_register' %}">Register</a></li>
                     <li><a href="{% url 'client_login' %}">Login</a></li>
                 {% endif %}
+
+                <li><a href="{% url 'calendar' %}?next={{ request.path }}">Calendar</a></li>
+                <li><a href="{% url 'person_list' %}?next={{ request.path }}">Person List</a></li>
             </ul>
         </nav>
     </header>

@@ -1,22 +1,37 @@
 from django.shortcuts import render, redirect
-from .models import Client, Note
-from .forms import ClientRegistrationForm, NoteForm, ClientRegisterForm
+from .models import Client, Note, Person, Event
+from .forms import ClientRegistrationForm, NoteForm, ClientRegisterForm, PersonRegistrationForm, EventForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required
 
 import calendar
 from datetime import date
 from django.utils import timezone
 
-def register_client(request):
+def register_person(request):
     if request.method == 'POST':
-        form = ClientRegistrationForm(request.POST)
+        form = PersonRegistrationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('client_registration_success')
+            person = form.save(commit=False)
+            person.client = request.user
+            person.save()
+            return redirect('person_list')
     else:
-        form = ClientRegistrationForm()
-    return render(request, 'calendar_app/client_registration.html', {'form': form})
+        form = PersonRegistrationForm()
+    return render(request, 'calendar_app/person_registration.html', {'form': form})
+
+def person_list(request):
+    people = Person.objects.filter(client=request.user)
+    return render(request, 'calendar_app/person_list.html', {'people': people})
+
+def person_detail(request, person_id):
+    person = Person.objects.get(id=person_id, client=request.user)
+    return render(request, 'calendar_app/person_detail.html', {'person': person})
+
+
+
+
 
 def client_notes(request, client_id):
     client = Client.objects.get(id=client_id)
@@ -37,6 +52,27 @@ def add_note(request, client_id):
     return render(request, 'calendar_app/add_note.html', {'form': form, 'client': client})
 
 
+
+
+
+@login_required
+def create_event(request):
+    if request.method == 'POST':
+        form = EventForm(request.POST, user=request.user)
+        if form.is_valid():
+            event = form.save(commit=False)
+            event.client = request.user
+            # If no person selected, require manual name/surname
+            if not event.person and not (event.manual_name and event.manual_surname):
+                form.add_error(None, "Please select a person or enter name and surname manually.")
+            else:
+                event.save()
+                return redirect('calendar')
+    else:
+        form = EventForm(user=request.user)
+    return render(request, 'calendar_app/event_form.html', {'form': form})
+
+
 #Calendar
 def calendar_view(request):
     today = timezone.now().date()
@@ -51,11 +87,13 @@ def calendar_view(request):
         week_days = []
         for day in week:
             notes = Note.objects.filter(created_at__date=day)
+            events = Event.objects.filter(date=day)
             week_days.append({
                 'day': day.day,
                 'date': day,
                 'in_month': day.month == month,
                 'notes': notes,
+                'events': events,
             })
         iso_week = week[0].isocalendar()[1]
         is_current_week = iso_week == week_num

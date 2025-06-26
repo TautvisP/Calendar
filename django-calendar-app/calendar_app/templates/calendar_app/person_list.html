@@ -1,0 +1,15 @@
+{% extends 'calendar_app/base.html' %}
+{% block content %}
+<h2>Registered People</h2>
+<ul>
+    {% for person in people %}
+        <li>
+            <a href="{% url 'person_detail' person.id %}">
+                {{ person.first_name }} {{ person.last_name }}
+            </a>
+        </li>
+    {% empty %}
+        <li>No people registered yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

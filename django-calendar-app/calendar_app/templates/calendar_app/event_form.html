@@ -1,0 +1,24 @@
+{% extends 'calendar_app/base.html' %}
+{% block content %}
+<h2>Create Calendar Event</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div>
+        {{ form.date.label_tag }} {{ form.date }}
+    </div>
+    <div>
+        {{ form.person.label_tag }} {{ form.person }}
+        <small>or enter manually:</small>
+        {{ form.manual_name.label_tag }} {{ form.manual_name }}
+        {{ form.manual_surname.label_tag }} {{ form.manual_surname }}
+    </div>
+    <div>
+        {{ form.tag.label_tag }} {{ form.tag }}
+    </div>
+    <div>
+        {{ form.note.label_tag }} {{ form.note }}
+    </div>
+    <button type="submit">Create Event</button>
+</form>
+{% endblock %}

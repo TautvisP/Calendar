@@ -135,3 +135,28 @@ main {
         display: none;
     }
 }
+
+
+.calendar-events {
+    margin-top: 2px;
+}
+.calendar-event {
+    font-size: 0.85em;
+    padding: 2px 4px;
+    margin-bottom: 2px;
+    border-radius: 3px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.tag-meet {
+    background: #1976d2;
+}
+.tag-reminder {
+    background: #43a047;
+}
+.tag-event {
+    background: #fbc02d;
+    color: #222;
+}

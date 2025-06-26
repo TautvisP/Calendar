@@ -21,13 +21,26 @@
         {% for day_name in day_names %}
             <div class="calendar-day calendar-header">{{ day_name }}</div>
         {% endfor %}
-        {% for week in month_days %}
+        
+
+{% for week in month_days %}
     <div class="calendar-week{% if week.iso_week == week_num %} current-week{% endif %}">
         {% for day in week.days %}
             <div class="calendar-day{% if not day.in_month %} other-month{% endif %}{% if day.date == today %} today{% endif %}">
                 <div class="day-number">
                     {{ day.day }}
                     <span class="day-name-mobile">{{ day.date|date:"D" }}</span>
+                </div>
+                <div class="calendar-events">
+                    {% for event in day.events %}
+                        <div class="calendar-event tag-{{ event.tag }}">
+                            {% if event.person %}
+                                {{ event.person.first_name }} {{ event.person.last_name }}
+                            {% else %}
+                                {{ event.manual_name }} {{ event.manual_surname }}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
                 </div>
                 <div class="day-notes">
                     {% for note in day.notes %}
@@ -40,6 +53,8 @@
         {% endfor %}
     </div>
 {% endfor %}
+        
+
     </div>
 </div>
 {% endblock %}
