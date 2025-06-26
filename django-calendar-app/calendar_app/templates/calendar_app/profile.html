@@ -64,5 +64,10 @@
     <tr><td colspan="3">No tags yet.</td></tr>
     {% endfor %}
 </table>
-<a href="{% url 'tag_create' %}">Add Tag</a>
+<h4>Add New Tag</h4>
+<form method="post" style="margin-top:10px;">
+    {% csrf_token %}
+    {{ add_tag_form.as_p }}
+    <button type="submit" name="add_tag">Add Tag</button>
+</form>
 {% endblock %}

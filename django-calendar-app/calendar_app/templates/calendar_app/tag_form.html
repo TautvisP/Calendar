@@ -1,9 +1,0 @@
-{% extends 'calendar_app/base.html' %}
-{% block content %}
-<h2>{% if form.instance.pk %}Edit Tag{% else %}Add Tag{% endif %}</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% if form.instance.pk %}Save{% else %}Create{% endif %}</button>
-</form>
-{% endblock %}

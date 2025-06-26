@@ -3,35 +3,62 @@ from django.contrib import messages
 from django.utils import timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from django.views.generic import (
-    ListView, DetailView, CreateView, UpdateView, DeleteView, FormView, TemplateView
-)
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from .models import Client, Person, Event, EventTag
-from .forms import (
-    ClientRegisterForm, PersonRegistrationForm, EventForm, ProfileForm, EventTagForm
-)
+from .models import Person, Event, EventTag
+from .forms import ClientRegisterForm, PersonRegistrationForm, EventForm, ProfileForm, EventTagForm
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
 
 # Person Views
-class PersonListView(LoginRequiredMixin, ListView):
-    model = Person
-    template_name = 'calendar_app/person_list.html'
-    context_object_name = 'people'
+class PersonListView(LoginRequiredMixin, View):
+    def get(self, request):
+        people = Person.objects.filter(client=request.user)
+        return render(request, 'calendar_app/person_list.html', {
+            'people': people,
+            'edit_person_id': None,
+            'edit_person_form': None,
+        })
 
-    def get_queryset(self):
-        return Person.objects.filter(client=self.request.user)
+    def post(self, request):
+        people = Person.objects.filter(client=request.user)
+        edit_person_id = request.POST.get('edit_person_id')
+        edit_person_form = None
 
-class PersonDetailView(LoginRequiredMixin, DetailView):
-    model = Person
-    template_name = 'calendar_app/person_detail.html'
-    context_object_name = 'person'
+        if 'edit_person' in request.POST and edit_person_id:
+            person = Person.objects.get(id=edit_person_id, client=request.user)
+            edit_person_form = PersonRegistrationForm(instance=person)
+            return render(request, 'calendar_app/person_list.html', {
+                'people': people,
+                'edit_person_id': int(edit_person_id),
+                'edit_person_form': edit_person_form,
+            })
+        elif 'save_person' in request.POST and edit_person_id:
+            person = Person.objects.get(id=edit_person_id, client=request.user)
+            edit_person_form = PersonRegistrationForm(request.POST, instance=person)
+            if edit_person_form.is_valid():
+                edit_person_form.save()
+                messages.success(request, "Person updated successfully.")
+                return redirect('person_list')
+            return render(request, 'calendar_app/person_list.html', {
+                'people': people,
+                'edit_person_id': int(edit_person_id),
+                'edit_person_form': edit_person_form,
+            })
+        elif 'delete_person' in request.POST and request.POST.get('delete_person_id'):
+            person = Person.objects.get(id=request.POST.get('delete_person_id'), client=request.user)
+            person.delete()
+            messages.success(request, "Person deleted successfully.")
+            return redirect('person_list')
 
-    def get_queryset(self):
-        return Person.objects.filter(client=self.request.user)
+        return render(request, 'calendar_app/person_list.html', {
+            'people': people,
+            'edit_person_id': None,
+            'edit_person_form': None,
+        })
+
 
 class PersonCreateView(LoginRequiredMixin, CreateView):
     model = Person
@@ -42,6 +69,8 @@ class PersonCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.client = self.request.user
         return super().form_valid(form)
+
+
 
 # Event Views
 class EventCreateView(LoginRequiredMixin, CreateView):
@@ -62,6 +91,8 @@ class EventCreateView(LoginRequiredMixin, CreateView):
             return self.form_invalid(form)
         return super().form_valid(form)
 
+
+
 class EventDetailView(LoginRequiredMixin, DetailView):
     model = Event
     template_name = 'calendar_app/event_detail.html'
@@ -71,8 +102,9 @@ class EventDetailView(LoginRequiredMixin, DetailView):
         return Event.objects.filter(client=self.request.user)
 
 
+
 # Calendar View
-class CalendarView(TemplateView):
+class CalendarView(LoginRequiredMixin, TemplateView):
     template_name = 'calendar_app/calendar.html'
 
     def get_context_data(self, **kwargs):
@@ -137,6 +169,9 @@ class CalendarView(TemplateView):
         })
         return context
 
+
+
+
 # Registration and Login Views
 class ClientRegisterView(View):
     def get(self, request):
@@ -154,6 +189,9 @@ class ClientRegisterView(View):
             return redirect('calendar')
         return render(request, 'calendar_app/client_register.html', {'form': form})
 
+
+
+
 class ClientLoginView(View):
     def get(self, request):
         form = AuthenticationForm()
@@ -167,10 +205,15 @@ class ClientLoginView(View):
             return redirect('calendar')
         return render(request, 'calendar_app/client_login.html', {'form': form})
 
+
+
 class CustomLogoutView(View):
     def get(self, request):
         logout(request)
         return redirect('calendar')
+
+
+
 
 # Profile and Tag Management
 class ProfileView(LoginRequiredMixin, View):
@@ -178,18 +221,21 @@ class ProfileView(LoginRequiredMixin, View):
         form = ProfileForm(instance=request.user)
         password_form = PasswordChangeForm(request.user, prefix='password')
         tags = EventTag.objects.filter(client=request.user)
+        add_tag_form = EventTagForm()
         return render(request, 'calendar_app/profile.html', {
             'form': form,
             'tags': tags,
             'edit_tag_id': None,
             'edit_tag_form': None,
             'password_form': password_form,
+            'add_tag_form': add_tag_form,
         })
 
     def post(self, request):
         edit_tag_id = None
         edit_tag_form = None
         password_form = PasswordChangeForm(request.user, request.POST or None, prefix='password')
+        add_tag_form = EventTagForm()
         if 'save_tag' in request.POST and request.POST.get('edit_tag_id'):
             edit_tag_id = int(request.POST.get('edit_tag_id'))
             edit_tag = EventTag.objects.get(id=edit_tag_id, client=request.user)
@@ -204,6 +250,15 @@ class ProfileView(LoginRequiredMixin, View):
             edit_tag = EventTag.objects.get(id=edit_tag_id, client=request.user)
             edit_tag_form = EventTagForm(instance=edit_tag)
             form = ProfileForm(instance=request.user)
+        elif 'add_tag' in request.POST:
+            form = ProfileForm(instance=request.user)
+            add_tag_form = EventTagForm(request.POST)
+            if add_tag_form.is_valid():
+                tag = add_tag_form.save(commit=False)
+                tag.client = request.user
+                tag.save()
+                messages.success(request, "Tag added successfully.")
+                return redirect('profile')
         elif 'change_password' in request.POST:
             form = ProfileForm(instance=request.user)
             if password_form.is_valid():
@@ -224,39 +279,15 @@ class ProfileView(LoginRequiredMixin, View):
             'edit_tag_id': edit_tag_id,
             'edit_tag_form': edit_tag_form,
             'password_form': password_form,
+            'add_tag_form': add_tag_form,
         })
 
-class TagListView(LoginRequiredMixin, ListView):
-    model = EventTag
-    template_name = 'calendar_app/tag_list.html'
-    context_object_name = 'tags'
 
-    def get_queryset(self):
-        return EventTag.objects.filter(client=self.request.user)
-
-class TagCreateView(LoginRequiredMixin, CreateView):
-    model = EventTag
-    form_class = EventTagForm
-    template_name = 'calendar_app/tag_form.html'
-    success_url = reverse_lazy('tag_list')
-
-    def form_valid(self, form):
-        form.instance.client = self.request.user
-        return super().form_valid(form)
-
-class TagEditView(LoginRequiredMixin, UpdateView):
-    model = EventTag
-    form_class = EventTagForm
-    template_name = 'calendar_app/tag_form.html'
-    success_url = reverse_lazy('tag_list')
-
-    def get_queryset(self):
-        return EventTag.objects.filter(client=self.request.user)
 
 class TagDeleteView(LoginRequiredMixin, DeleteView):
     model = EventTag
     template_name = 'calendar_app/tag_confirm_delete.html'
-    success_url = reverse_lazy('tag_list')
+    success_url = reverse_lazy('profile')
 
     def get_queryset(self):
         return EventTag.objects.filter(client=self.request.user)
