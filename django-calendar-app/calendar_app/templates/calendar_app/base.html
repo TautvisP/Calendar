@@ -18,6 +18,9 @@
                         <a href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
                     </li>
                     <li>
+                        <a href="{% url 'profile' %}?next={{ request.path }}">Profile</a>
+                    </li>
+                    <li>
                         <a href="{% url 'register_person' %}" class="btn btn-primary">Register Person</a>
                     </li>
                     <li>

@@ -1,0 +1,14 @@
+{% extends 'calendar_app/base.html' %}
+{% block content %}
+<h2>Your Event Tags</h2>
+<ul>
+    {% for tag in tags %}
+        <li>
+            <span style="display:inline-block;width:16px;height:16px;background:{{ tag.color }};vertical-align:middle;"></span>
+            {{ tag.name }}
+        </li>
+    {% empty %}
+        <li>No tags yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

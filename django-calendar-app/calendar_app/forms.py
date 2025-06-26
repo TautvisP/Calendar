@@ -1,13 +1,8 @@
 from django import forms
-from .models import Client, Note, Person, Event
+from .models import Client, Note, Person, Event, EventTag
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 
-
-class ClientRegistrationForm(forms.ModelForm):
-    class Meta:
-        model = Client
-        fields = ['first_name', 'last_name', 'email', 'phone_number']
 
 class NoteForm(forms.ModelForm):
     class Meta:
@@ -40,6 +35,7 @@ class EventForm(forms.ModelForm):
     )
     manual_name = forms.CharField(required=False, label="Manual Name")
     manual_surname = forms.CharField(required=False, label="Manual Surname")
+    tag = forms.ModelChoiceField(queryset=EventTag.objects.none())
 
     class Meta:
         model = Event
@@ -50,3 +46,16 @@ class EventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             self.fields['person'].queryset = Person.objects.filter(client=user)
+            self.fields['tag'].queryset = EventTag.objects.filter(client=user)
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'email']
+
+class EventTagForm(forms.ModelForm):
+    color = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}))
+    class Meta:
+        model = EventTag
+        fields = ['name', 'color']

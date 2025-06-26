@@ -149,6 +149,9 @@ main {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: block;
+    text-decoration: none;
+    cursor: pointer;
 }
 .tag-meet {
     background: #1976d2;

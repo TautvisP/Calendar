@@ -1,0 +1,22 @@
+{% extends 'calendar_app/base.html' %}
+{% block content %}
+<h2>Event Details</h2>
+<ul>
+    <li><strong>Date:</strong> {{ event.date }}</li>
+    <li><strong>Tag:</strong> {{ event.get_tag_display }}</li>
+    <li><strong>Person:</strong>
+        {% if event.person %}
+            {{ event.person.first_name }} {{ event.person.last_name }}
+            <ul>
+                <li><strong>Phone:</strong> {{ event.person.phone_number|default:"—" }}</li>
+                <li><strong>Email:</strong> {{ event.person.email|default:"—" }}</li>
+                <li><strong>Notes:</strong> {{ event.person.notes|linebreaksbr|default:"—" }}</li>
+            </ul>
+        {% else %}
+            {{ event.manual_name }} {{ event.manual_surname }}
+        {% endif %}
+    </li>
+    <li><strong>Note:</strong> {{ event.note|linebreaksbr|default:"—" }}</li>
+</ul>
+<a href="{% url 'calendar' %}">Back to Calendar</a>
+{% endblock %}

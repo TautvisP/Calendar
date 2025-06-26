@@ -1,0 +1,68 @@
+{% extends 'calendar_app/base.html' %}
+{% block content %}
+<h2>Edit Profile</h2>
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+
+<h3>Change Password</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ password_form.as_p }}
+    <button type="submit" name="change_password">Change Password</button>
+</form>
+
+<h3>Your Event Tags</h3>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Color</th>
+        <th>Actions</th>
+    </tr>
+    {% for tag in tags %}
+    <tr>
+        {% if edit_tag_id == tag.id %}
+            <form method="post">
+                {% csrf_token %}
+                <td>{{ edit_tag_form.name }}</td>
+                <td>{{ edit_tag_form.color }}</td>
+                <td>
+                    <input type="hidden" name="edit_tag_id" value="{{ tag.id }}">
+                    <button type="submit" name="save_tag">Save</button>
+                    <a href="{% url 'profile' %}">Cancel</a>
+                </td>
+            </form>
+        {% else %}
+            <td>{{ tag.name }}</td>
+            <td>
+                <span style="display:inline-block;width:20px;height:20px;background:{{ tag.color }};border-radius:3px;border:1px solid #ccc;"></span>
+                {{ tag.color }}
+            </td>
+            <td>
+                <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="edit_tag_id" value="{{ tag.id }}">
+                    <button type="submit" name="edit">Edit</button>
+                </form>
+                <form method="post" action="{% url 'tag_delete' tag.id %}" style="display:inline;" onsubmit="return confirm('Delete this tag?');">
+                    {% csrf_token %}
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        {% endif %}
+    </tr>
+    {% empty %}
+    <tr><td colspan="3">No tags yet.</td></tr>
+    {% endfor %}
+</table>
+<a href="{% url 'tag_create' %}">Add Tag</a>
+{% endblock %}

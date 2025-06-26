@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect
-from .models import Client, Note, Person, Event
-from .forms import ClientRegistrationForm, NoteForm, ClientRegisterForm, PersonRegistrationForm, EventForm
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
+from .models import Client, Note, Person, Event, EventTag
+from .forms import NoteForm, ClientRegisterForm, PersonRegistrationForm, EventForm, ProfileForm, EventTagForm
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from django.contrib.auth.decorators import login_required
-
 import calendar
 from datetime import date
 from django.utils import timezone
+from django.contrib import messages
 
 def register_person(request):
     if request.method == 'POST':
@@ -72,6 +72,10 @@ def create_event(request):
         form = EventForm(user=request.user)
     return render(request, 'calendar_app/event_form.html', {'form': form})
 
+
+def event_detail(request, event_id):
+    event = Event.objects.get(id=event_id, client=request.user)
+    return render(request, 'calendar_app/event_detail.html', {'event': event})
 
 #Calendar
 def calendar_view(request):
@@ -146,6 +150,7 @@ def client_register(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
+            user.first_name = user.username  # Set first_name as username
             user.save()
             login(request, user)
             return redirect('calendar')
@@ -166,5 +171,94 @@ def client_login(request):
 
 def custom_logout(request):
     logout(request)
-    next_url = request.GET.get('next', '/')
-    return redirect(next_url)
+    return redirect('calendar')
+
+
+#Profile and tag management
+@login_required
+def profile_view(request):
+    edit_tag_id = None
+    edit_tag_form = None
+    password_form = PasswordChangeForm(request.user, request.POST or None, prefix='password')
+
+    if request.method == 'POST':
+        # Save tag edit
+        if 'save_tag' in request.POST and request.POST.get('edit_tag_id'):
+            edit_tag_id = int(request.POST.get('edit_tag_id'))
+            edit_tag = EventTag.objects.get(id=edit_tag_id, client=request.user)
+            edit_tag_form = EventTagForm(request.POST, instance=edit_tag)
+            form = ProfileForm(instance=request.user)
+            if edit_tag_form.is_valid():
+                edit_tag_form.save()
+                messages.success(request, "Tag updated successfully.")
+                return redirect('profile')
+        # Show tag edit form (do not save)
+        elif 'edit' in request.POST and request.POST.get('edit_tag_id'):
+            edit_tag_id = int(request.POST.get('edit_tag_id'))
+            edit_tag = EventTag.objects.get(id=edit_tag_id, client=request.user)
+            edit_tag_form = EventTagForm(instance=edit_tag)
+            form = ProfileForm(instance=request.user)
+        # Save password
+        elif 'change_password' in request.POST:
+            form = ProfileForm(instance=request.user)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Password changed successfully.")
+                return redirect('profile')
+        # Save profile
+        else:
+            form = ProfileForm(request.POST, instance=request.user)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Profile updated successfully.")
+                return redirect('profile')
+    else:
+        form = ProfileForm(instance=request.user)
+
+    tags = EventTag.objects.filter(client=request.user)
+    return render(request, 'calendar_app/profile.html', {
+        'form': form,
+        'tags': tags,
+        'edit_tag_id': edit_tag_id,
+        'edit_tag_form': edit_tag_form,
+        'password_form': password_form,
+    })
+
+@login_required
+def tag_list(request):
+    tags = EventTag.objects.filter(client=request.user)
+    return render(request, 'calendar_app/tag_list.html', {'tags': tags})
+
+@login_required
+def tag_create(request):
+    if request.method == 'POST':
+        form = EventTagForm(request.POST)
+        if form.is_valid():
+            tag = form.save(commit=False)
+            tag.client = request.user
+            tag.save()
+            return redirect('tag_list')
+    else:
+        form = EventTagForm()
+    return render(request, 'calendar_app/tag_form.html', {'form': form})
+
+@login_required
+def tag_edit(request, tag_id):
+    tag = EventTag.objects.get(id=tag_id, client=request.user)
+    if request.method == 'POST':
+        form = EventTagForm(request.POST, instance=tag)
+        if form.is_valid():
+            form.save()
+            return redirect('tag_list')
+    else:
+        form = EventTagForm(instance=tag)
+    return render(request, 'calendar_app/tag_form.html', {'form': form})
+
+@login_required
+def tag_delete(request, tag_id):
+    tag = EventTag.objects.get(id=tag_id, client=request.user)
+    if request.method == 'POST':
+        tag.delete()
+        return redirect('tag_list')
+    return render(request, 'calendar_app/tag_confirm_delete.html', {'tag': tag})

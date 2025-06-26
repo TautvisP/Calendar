@@ -33,13 +33,13 @@
                 </div>
                 <div class="calendar-events">
                     {% for event in day.events %}
-                        <div class="calendar-event tag-{{ event.tag }}">
+                        <a href="{% url 'event_detail' event.id %}" class="calendar-event"style="background: {{ event.tag.color }}; color: #fff;">
                             {% if event.person %}
                                 {{ event.person.first_name }} {{ event.person.last_name }}
                             {% else %}
                                 {{ event.manual_name }} {{ event.manual_surname }}
                             {% endif %}
-                        </div>
+                        </a>
                     {% endfor %}
                 </div>
                 <div class="day-notes">
