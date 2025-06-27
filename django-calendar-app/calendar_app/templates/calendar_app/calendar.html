@@ -32,17 +32,20 @@
                     <span class="day-name-mobile">{{ day.date|date:"D" }}</span>
                 </div>
                 <div class="calendar-events">
-                    {% for event in day.events %}
-                        <a href="{% url 'event_detail' event.id %}" class="calendar-event"style="background: {{ event.tag.color }}; color: #fff;">
-                            {% if event.person and event.person.role %}
-                                <span style="background: {{ event.person.role.color }}; color: #fff; border-radius: 3px; padding: 0 0.5em;">
-                                    {{ event.person.role.name }}
-                                </span>
-                            {% else %}
-                                {{ event.manual_name }} {{ event.manual_surname }}
-                            {% endif %}
-                        </a>
-                    {% endfor %}
+{% for event in day.events %}
+    <a href="{% url 'event_detail' event.id %}" class="calendar-event" style="background: {{ event.tag.color }}; color: #fff;">
+        {% if event.person %}
+            {{ event.person.first_name }} {{ event.person.last_name }}
+            {% if event.person.role %}
+                <span style="background: {{ event.person.role.color }}; color: #fff; border-radius: 3px; padding: 0 0.5em; margin-left: 0.5em;">
+                    {{ event.person.role.name }}
+                </span>
+            {% endif %}
+        {% else %}
+            {{ event.manual_name }} {{ event.manual_surname }}
+        {% endif %}
+    </a>
+{% endfor %}
                 </div>
                 <div class="day-notes">
                     {% for note in day.notes %}
