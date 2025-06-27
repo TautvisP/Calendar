@@ -1,6 +1,7 @@
 {% extends 'calendar_app/base.html' %}
 {% block content %}
-<h2>Edit Profile</h2>
+<div class="profile-container">
+<h2>Profilio Redagavimas</h2>
 {% if messages %}
     <ul class="messages">
         {% for message in messages %}
@@ -11,22 +12,22 @@
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Save</button>
+    <button type="submit">Išsaugoti</button>
 </form>
 
-<h3>Change Password</h3>
+<h3>Slaptažodžio Keitimas</h3>
 <form method="post">
     {% csrf_token %}
     {{ password_form.as_p }}
-    <button type="submit" name="change_password">Change Password</button>
+    <button type="submit" name="change_password">Pakeisti Slaptažodį</button>
 </form>
 
-<h3>Your Event Tags</h3>
+<h3>Jūsų Įvykių Žymos</h3>
 <table>
     <tr>
-        <th>Name</th>
-        <th>Color</th>
-        <th>Actions</th>
+        <th>Pavadinimas</th>
+        <th>Spalva</th>
+        <th>Veiksmai</th>
     </tr>
     {% for tag in tags %}
     <tr>
@@ -37,8 +38,8 @@
                 <td>{{ edit_tag_form.color }}</td>
                 <td>
                     <input type="hidden" name="edit_tag_id" value="{{ tag.id }}">
-                    <button type="submit" name="save_tag">Save</button>
-                    <a href="{% url 'profile' %}">Cancel</a>
+                    <button type="submit" name="save_tag">Išsaugoti</button>
+                    <a href="{% url 'profile' %}">Atšaukti</a>
                 </td>
             </form>
         {% else %}
@@ -51,23 +52,25 @@
                 <form method="post" style="display:inline;">
                     {% csrf_token %}
                     <input type="hidden" name="edit_tag_id" value="{{ tag.id }}">
-                    <button type="submit" name="edit">Edit</button>
+                    <button type="submit" name="edit">Redaguoti</button>
                 </form>
-                <form method="post" action="{% url 'tag_delete' tag.id %}" style="display:inline;" onsubmit="return confirm('Delete this tag?');">
+                <form method="post" action="{% url 'tag_delete' tag.id %}" style="display:inline;" onsubmit="return confirm('Ištrinti šią žymę?');">
                     {% csrf_token %}
-                    <button type="submit">Delete</button>
+                    <button type="submit">Ištrinti</button>
                 </form>
             </td>
         {% endif %}
     </tr>
     {% empty %}
-    <tr><td colspan="3">No tags yet.</td></tr>
+    <tr><td colspan="3">Šiuo Metu Jokių Žymų.</td></tr>
     {% endfor %}
 </table>
-<h4>Add New Tag</h4>
+
+<h3>Pridėti Naują Žymę</h3>
 <form method="post" style="margin-top:10px;">
     {% csrf_token %}
     {{ add_tag_form.as_p }}
-    <button type="submit" name="add_tag">Add Tag</button>
+    <button type="submit" name="add_tag">Pridėti</button>
 </form>
+</div>
 {% endblock %}

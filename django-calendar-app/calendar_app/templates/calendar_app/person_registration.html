@@ -1,9 +1,11 @@
 {% extends 'calendar_app/base.html' %}
 {% block content %}
-<h1>Register Person</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Register</button>
-</form>
+<div class="profile-container">
+    <h2>Registruoti Žmogų</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Registruoti</button>
+    </form>
+</div>
 {% endblock %}

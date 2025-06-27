@@ -1,6 +1,7 @@
 {% extends 'calendar_app/base.html' %}
 {% block content %}
-<h2>Registered People</h2>
+<div class="profile-container">
+<h2>Registruoti Žmonės</h2>
 <ul>
     {% for person in people %}
         <li style="margin-bottom: 1em;">
@@ -13,30 +14,31 @@
                     {{ edit_person_form.email.label_tag }} {{ edit_person_form.email }}
                     {{ edit_person_form.notes.label_tag }} {{ edit_person_form.notes }}
                     <input type="hidden" name="edit_person_id" value="{{ person.id }}">
-                    <button type="submit" name="save_person">Save</button>
-                    <a href="{% url 'person_list' %}">Cancel</a>
+                    <button type="submit" name="save_person">Išsaugoti</button>
+                    <a href="{% url 'person_list' %}">Atšaukti</a>
                 </form>
             {% else %}
                 <strong>{{ person.first_name }} {{ person.last_name }}</strong>
                 <ul>
-                    <li><strong>Phone:</strong> {{ person.phone_number|default:"—" }}</li>
-                    <li><strong>Email:</strong> {{ person.email|default:"—" }}</li>
-                    <li><strong>Notes:</strong> {{ person.notes|linebreaksbr|default:"—" }}</li>
+                    <li><strong>Tel. Nr.:</strong> {{ person.phone_number|default:"—" }}</li>
+                    <li><strong>El. Paštas:</strong> {{ person.email|default:"—" }}</li>
+                    <li><strong>Užrašai:</strong> {{ person.notes|linebreaksbr|default:"—" }}</li>
                 </ul>
                 <form method="post" style="display:inline;">
                     {% csrf_token %}
                     <input type="hidden" name="edit_person_id" value="{{ person.id }}">
-                    <button type="submit" name="edit_person">Edit</button>
+                    <button type="submit" name="edit_person">Redaguoti</button>
                 </form>
                 <form method="post" style="display:inline;" onsubmit="return confirm('Delete this person?');">
                     {% csrf_token %}
                     <input type="hidden" name="delete_person_id" value="{{ person.id }}">
-                    <button type="submit" name="delete_person">Delete</button>
+                    <button type="submit" name="delete_person">Ištrinti</button>
                 </form>
             {% endif %}
         </li>
     {% empty %}
-        <li>No people registered yet.</li>
+        <li>Registruotų Žmonių Nėra.</li>
     {% endfor %}
 </ul>
+</div>
 {% endblock %}

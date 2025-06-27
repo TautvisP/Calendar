@@ -1,20 +1,39 @@
 from django import forms
 from .models import Client, Person, Event, EventTag
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import AuthenticationForm
-
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
 class ClientRegisterForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+    username = forms.CharField(label='Vartotojo vardas')
+    password = forms.CharField(widget=forms.PasswordInput, label='Slaptažodis')
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'password']
 
 class ClientLoginForm(AuthenticationForm):
-    username = forms.CharField(label='Email / Username')
-    password = forms.CharField(widget=forms.PasswordInput)
+    username = forms.CharField(label='Vartotojo vardas')
+    password = forms.CharField(widget=forms.PasswordInput, label='Slaptažodis')
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        label='Senas slaptažodis',
+        widget=forms.PasswordInput(attrs={'autocomplete': 'current-password', 'autofocus': True}),
+    )
+    new_password1 = forms.CharField(
+        label='Naujas slaptažodis',
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+    )
+    new_password2 = forms.CharField(
+        label='Pakartokite naują slaptažodį',
+        widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}),
+    )
 
 class PersonRegistrationForm(forms.ModelForm):
+    first_name = forms.CharField(label='Vardas')
+    last_name = forms.CharField(label='Pavardė')
+    phone_number = forms.CharField(label='Tel. Nr.', required=False)
+    email = forms.EmailField(label='El. paštas', required=False)
+    notes = forms.CharField(label='Užrašai', widget=forms.Textarea, required=False)
     class Meta:
         model = Person
         fields = ['first_name', 'last_name', 'phone_number', 'email', 'notes']
@@ -22,14 +41,15 @@ class PersonRegistrationForm(forms.ModelForm):
 class EventForm(forms.ModelForm):
     date = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}),
-        label="Date"
+        label="Data"
     )
     person = forms.ModelChoiceField(
-        queryset=Person.objects.none(), required=False, label="Select Person"
+        queryset=Person.objects.none(), required=False, label="Pasirinkite žmogų"
     )
-    manual_name = forms.CharField(required=False, label="Manual Name")
-    manual_surname = forms.CharField(required=False, label="Manual Surname")
-    tag = forms.ModelChoiceField(queryset=EventTag.objects.none())
+    manual_name = forms.CharField(required=False, label="Vardas (rankiniu būdu)")
+    manual_surname = forms.CharField(required=False, label="Pavardė (rankiniu būdu)")
+    tag = forms.ModelChoiceField(queryset=EventTag.objects.none(), label="Žyma")
+    note = forms.CharField(widget=forms.Textarea, required=False, label="Užrašas")
 
     class Meta:
         model = Event
@@ -42,14 +62,15 @@ class EventForm(forms.ModelForm):
             self.fields['person'].queryset = Person.objects.filter(client=user)
             self.fields['tag'].queryset = EventTag.objects.filter(client=user)
 
-
 class ProfileForm(forms.ModelForm):
+    first_name = forms.CharField(label='Vardas')
     class Meta:
         model = User
-        fields = ['first_name', 'email']
+        fields = ['first_name']
 
 class EventTagForm(forms.ModelForm):
-    color = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}))
+    name = forms.CharField(label='Pavadinimas')
+    color = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}), label='Spalva')
     class Meta:
         model = EventTag
         fields = ['name', 'color']

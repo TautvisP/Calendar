@@ -1,22 +1,32 @@
 {% extends 'calendar_app/base.html' %}
 {% block content %}
-<h2>Event Details</h2>
-<ul>
-    <li><strong>Date:</strong> {{ event.date }}</li>
-    <li><strong>Tag:</strong> {{ event.get_tag_display }}</li>
-    <li><strong>Person:</strong>
-        {% if event.person %}
-            {{ event.person.first_name }} {{ event.person.last_name }}
-            <ul>
-                <li><strong>Phone:</strong> {{ event.person.phone_number|default:"—" }}</li>
-                <li><strong>Email:</strong> {{ event.person.email|default:"—" }}</li>
-                <li><strong>Notes:</strong> {{ event.person.notes|linebreaksbr|default:"—" }}</li>
-            </ul>
-        {% else %}
-            {{ event.manual_name }} {{ event.manual_surname }}
-        {% endif %}
-    </li>
-    <li><strong>Note:</strong> {{ event.note|linebreaksbr|default:"—" }}</li>
-</ul>
-<a href="{% url 'calendar' %}">Back to Calendar</a>
+<div class="profile-container" style="max-width: 500px;">
+    <h2>Įvykio Informacija</h2>
+    <ul class="event-detail-list">
+        <li><strong>Data:</strong> {{ event.date|date:"Y-m-d" }}</li>
+        <li>
+            <strong>Žyma:</strong>
+            {% if event.tag %}
+                <span style="display:inline-block;width:16px;height:16px;background:{{ event.tag.color }};border-radius:3px;border:1px solid #ccc;vertical-align:middle;margin-right:5px;"></span>
+                {{ event.tag.name }}
+            {% else %}
+                —
+            {% endif %}
+        </li>
+        <li><strong>Žmogus:</strong>
+            {% if event.person %}
+                {{ event.person.first_name }} {{ event.person.last_name }}
+                <ul>
+                    <li><strong>Tel. Nr.:</strong> {{ event.person.phone_number|default:"—" }}</li>
+                    <li><strong>El. Paštas:</strong> {{ event.person.email|default:"—" }}</li>
+                    <li><strong>Užrašai:</strong> {{ event.person.notes|linebreaksbr|default:"—" }}</li>
+                </ul>
+            {% else %}
+                {{ event.manual_name }} {{ event.manual_surname }}
+            {% endif %}
+        </li>
+        <li><strong>Įvykio Užrašai:</strong> {{ event.note|linebreaksbr|default:"—" }}</li>
+    </ul>
+    <a href="{% url 'calendar' %}" class="btn-back">Grįžti</a>
+</div>
 {% endblock %}

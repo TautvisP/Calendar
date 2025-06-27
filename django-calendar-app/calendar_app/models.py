@@ -6,8 +6,6 @@ from django.db.models.signals import post_save
 
 class Client(models.Model):
     first_name = models.CharField(max_length=30)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

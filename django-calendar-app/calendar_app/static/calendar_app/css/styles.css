@@ -4,26 +4,90 @@ body {
     margin: 0;
     padding: 0;
 }
+
+main {
+    padding: 2em;
+}
+
+
 header {
     background: #343a40;
     color: #fff;
     padding: 1em 0;
     text-align: center;
 }
+
 nav ul {
     list-style: none;
     padding: 0;
+    margin: 0;
 }
+
 nav ul li {
     display: inline-block;
     margin: 0 1em;
 }
+
 nav ul li a {
     color: #fff;
     text-decoration: none;
+    font-size: 1em;
+    padding: 0.2em 0.5em;
+    border-radius: 3px;
+    transition: background 0.2s;
 }
-main {
-    padding: 2em;
+
+nav ul li a:hover,
+nav ul li a:focus {
+    background: #1976d2;
+    color: #fff;
+}
+@media (max-width: 700px) {
+    header h1 {
+        font-size: 1.3em;
+        padding: 0.5em 0;
+    }
+    nav ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2em;
+    }
+    nav ul li {
+        display: block;
+        margin: 0.2em 0;
+    }
+    nav ul li a {
+        font-size: 1em;
+        padding: 0.5em 1em;
+        display: block;
+        width: 100vw;
+        max-width: 320px;
+        box-sizing: border-box;
+    }
+}
+
+/* Hide menu items by default on small screens */
+@media (max-width: 900px) {
+    .main-nav .menu-item {
+        display: none;
+    }
+    .main-nav .menu-item.show-menu {
+        display: block;
+    }
+    .main-nav .menu-toggle-li {
+        display: inline-block;
+    }
+}
+
+/* Always show menu items on large screens */
+@media (min-width: 901px) {
+    .main-nav .menu-item {
+        display: inline-block;
+    }
+    .main-nav .menu-toggle-li {
+        display: none;
+    }
 }
 
 /* CALENDAR STYLES */
@@ -162,4 +226,175 @@ main {
 .tag-event {
     background: #fbc02d;
     color: #222;
+}
+
+/* Profile Page Styling */
+.profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2em 1.5em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.profile-container h2,
+.profile-container h3,
+.profile-container h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.profile-container form {
+    margin-bottom: 1.5em;
+}
+
+.profile-container label {
+    display: block;
+    margin-bottom: 0.3em;
+    font-weight: 500;
+    color: #222;
+}
+
+.profile-container input[type="text"],
+.profile-container input[type="email"],
+.profile-container input[type="password"],
+.profile-container input[type="date"],
+.profile-container select,
+.profile-container textarea {
+    width: 100%;
+    padding: 0.5em 0.7em;
+    margin-bottom: 1em;
+    border: 1px solid #cfd8dc;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #f7fafc;
+    box-sizing: border-box;
+    transition: border 0.2s;
+}
+
+.profile-container input[type="text"]:focus,
+.profile-container input[type="email"]:focus,
+.profile-container input[type="password"]:focus,
+.profile-container input[type="date"]:focus,
+.profile-container select:focus,
+.profile-container textarea:focus {
+    border: 1.5px solid #1976d2;
+    outline: none;
+    background: #fff;
+}
+
+.profile-container textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.profile-container button,
+.profile-container input[type="submit"] {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 0.5em;
+    transition: background 0.2s;
+    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.07);
+}
+
+.profile-container button:hover,
+.profile-container input[type="submit"]:hover {
+    background: #1565c0;
+}
+
+.profile-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+    background: #fafafa;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.profile-container th, .profile-container td {
+    padding: 0.7em 0.5em;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-container th {
+    background: #e3f2fd;
+    font-weight: 600;
+}
+
+.profile-container tr:last-child td {
+    border-bottom: none;
+}
+
+.profile-container .messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1em;
+}
+.profile-container .messages li {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.5em 1em;
+    border-radius: 4px;
+    margin-bottom: 0.5em;
+    font-size: 1em;
+}
+
+@media (max-width: 700px) {
+    .profile-container {
+        padding: 1em 0.5em;
+    }
+    .profile-container table,
+    .profile-container th,
+    .profile-container td {
+        font-size: 0.95em;
+    }
+    .profile-container th, .profile-container td {
+        padding: 0.5em 0.2em;
+    }
+    .profile-container button,
+    .profile-container input[type="submit"] {
+        width: 100%;
+        margin: 0.3em 0 0.3em 0;
+    }
+}
+
+.event-detail-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5em 0;
+}
+
+.event-detail-list > li {
+    margin-bottom: 1em;
+    font-size: 1.05em;
+}
+
+.event-detail-list ul {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    padding-left: 1.2em;
+    font-size: 0.97em;
+}
+
+.btn-back {
+    display: inline-block;
+    background: #1976d2;
+    color: #fff !important;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    text-decoration: none;
+    margin-top: 1em;
+    transition: background 0.2s;
+}
+.btn-back:hover {
+    background: #1565c0;
 }

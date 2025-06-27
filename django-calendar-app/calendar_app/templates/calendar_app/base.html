@@ -4,36 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Django Calendar App{% endblock %}</title>
+    <title>{% block title %}Kalendorius{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'calendar_app/css/styles.css' %}">
 </head>
 <body>
     <header>
-        <h1>Django Calendar Application</h1>
+        <h1>Nuosavo Kalendoriaus Svetainė</h1>
         <nav>
-            <ul>
+            <ul class="main-nav">
                 {% if user.is_authenticated %}
-                    <li>Hello, {{ user.username }}</li>
+                    <li>Labas, {{ user.username }}</li>
                     <li>
-                        <a href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
+                        <a href="{% url 'logout' %}?next={{ request.path }}">Atsijungti</a>
                     </li>
-                    <li>
-                        <a href="{% url 'profile' %}?next={{ request.path }}">Profile</a>
+                    <li class="menu-toggle-li">
+                        <button id="menu-toggle" aria-label="Meniu"><span style="font-size:1.5em;">☰</span></button>
                     </li>
-                    <li>
-                        <a href="{% url 'register_person' %}" class="btn btn-primary">Register Person</a>
+                    <li class="menu-item">
+                        <a href="{% url 'profile' %}?next={{ request.path }}">Profilis</a>
                     </li>
-                    <li>
-                        <a href="{% url 'create_event' %}" class="btn btn-primary">Create Event</a>
+                    <li class="menu-item">
+                        <a href="{% url 'register_person' %}" class="btn btn-primary">Registruoti Žmogų</a>
                     </li>
-                        
+                    <li class="menu-item">
+                        <a href="{% url 'person_list' %}?next={{ request.path }}">Žmonių Sąrašas</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'calendar' %}?next={{ request.path }}">Kalendorius</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="{% url 'create_event' %}" class="btn btn-primary">Sukurti Įvykį</a>
+                    </li>
                 {% else %}
-                    <li><a href="{% url 'client_register' %}">Register</a></li>
-                    <li><a href="{% url 'client_login' %}">Login</a></li>
+                    <li><a href="{% url 'client_register' %}">Registruotis</a></li>
+                    <li><a href="{% url 'client_login' %}">Prisijungti</a></li>
                 {% endif %}
-
-                <li><a href="{% url 'calendar' %}?next={{ request.path }}">Calendar</a></li>
-                <li><a href="{% url 'person_list' %}?next={{ request.path }}">Person List</a></li>
             </ul>
         </nav>
     </header>
@@ -41,5 +46,18 @@
         {% block content %}
         {% endblock %}
     </main>
+    <script>
+        // Simple menu toggle for authenticated users
+        document.addEventListener('DOMContentLoaded', function() {
+            var toggle = document.getElementById('menu-toggle');
+            if (toggle) {
+                toggle.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-item').forEach(function(item) {
+                        item.classList.toggle('show-menu');
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>
