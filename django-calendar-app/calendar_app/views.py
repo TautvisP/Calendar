@@ -6,8 +6,8 @@ from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from .models import Person, Event, EventTag
-from .forms import ClientRegisterForm, PersonRegistrationForm, EventForm, ProfileForm, EventTagForm, CustomPasswordChangeForm, ClientLoginForm
+from .models import Person, Event, EventTag, PersonRole
+from .forms import ClientRegisterForm, PersonRegistrationForm, EventForm, ProfileForm, EventTagForm, CustomPasswordChangeForm, ClientLoginForm, PersonRoleForm
 from django.contrib.auth import login, logout, update_session_auth_hash
 
 
@@ -28,7 +28,7 @@ class PersonListView(LoginRequiredMixin, View):
 
         if 'edit_person' in request.POST and edit_person_id:
             person = Person.objects.get(id=edit_person_id, client=request.user)
-            edit_person_form = PersonRegistrationForm(instance=person)
+            edit_person_form = PersonRegistrationForm(instance=person, user=request.user)
             return render(request, 'calendar_app/person_list.html', {
                 'people': people,
                 'edit_person_id': int(edit_person_id),
@@ -36,7 +36,8 @@ class PersonListView(LoginRequiredMixin, View):
             })
         elif 'save_person' in request.POST and edit_person_id:
             person = Person.objects.get(id=edit_person_id, client=request.user)
-            edit_person_form = PersonRegistrationForm(request.POST, instance=person)
+            edit_person_form = PersonRegistrationForm(request.POST, instance=person, user=request.user)
+
             if edit_person_form.is_valid():
                 edit_person_form.save()
                 messages.success(request, "Žmogaus informacija sėkmingai atnaujinta.")
@@ -65,10 +66,14 @@ class PersonCreateView(LoginRequiredMixin, CreateView):
     template_name = 'calendar_app/person_registration.html'
     success_url = reverse_lazy('person_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.client = self.request.user
         return super().form_valid(form)
-
 
 
 # Event Views
@@ -125,7 +130,7 @@ class CalendarView(LoginRequiredMixin, TemplateView):
         for week in cal.monthdatescalendar(year, month):
             week_days = []
             for day in week:
-                events = Event.objects.filter(date=day)
+                events = Event.objects.filter(date=day, client=self.request.user)
                 week_days.append({
                     'day': day.day,
                     'date': day,
@@ -226,21 +231,34 @@ class ProfileView(LoginRequiredMixin, View):
         form = ProfileForm(instance=request.user)
         password_form = CustomPasswordChangeForm(request.user, prefix='password')
         tags = EventTag.objects.filter(client=request.user)
+        roles = PersonRole.objects.filter(client=request.user)
         add_tag_form = EventTagForm()
+        add_role_form = PersonRoleForm()
         return render(request, 'calendar_app/profile.html', {
             'form': form,
             'tags': tags,
+            'roles': roles,
             'edit_tag_id': None,
             'edit_tag_form': None,
+            'edit_role_id': None,
+            'edit_role_form': None,
             'password_form': password_form,
             'add_tag_form': add_tag_form,
+            'add_role_form': add_role_form,
         })
 
     def post(self, request):
         edit_tag_id = None
         edit_tag_form = None
+        edit_role_id = None
+        edit_role_form = None
         password_form = CustomPasswordChangeForm(request.user, request.POST or None, prefix='password')
         add_tag_form = EventTagForm()
+        add_role_form = PersonRoleForm()
+        roles = PersonRole.objects.filter(client=request.user)
+        tags = EventTag.objects.filter(client=request.user)
+
+        # TAGS
         if 'save_tag' in request.POST and request.POST.get('edit_tag_id'):
             edit_tag_id = int(request.POST.get('edit_tag_id'))
             edit_tag = EventTag.objects.get(id=edit_tag_id, client=request.user)
@@ -264,6 +282,38 @@ class ProfileView(LoginRequiredMixin, View):
                 tag.save()
                 messages.success(request, "Žyma pridėta sėkmingai.")
                 return redirect('profile')
+
+        # ROLES
+        elif 'save_role' in request.POST and request.POST.get('edit_role_id'):
+            edit_role_id = int(request.POST.get('edit_role_id'))
+            edit_role = PersonRole.objects.get(id=edit_role_id, client=request.user)
+            edit_role_form = PersonRoleForm(request.POST, instance=edit_role)
+            form = ProfileForm(instance=request.user)
+            if edit_role_form.is_valid():
+                edit_role_form.save()
+                messages.success(request, "Rolė atnaujinta sėkmingai.")
+                return redirect('profile')
+        elif 'edit_role' in request.POST and request.POST.get('edit_role_id'):
+            edit_role_id = int(request.POST.get('edit_role_id'))
+            edit_role = PersonRole.objects.get(id=edit_role_id, client=request.user)
+            edit_role_form = PersonRoleForm(instance=edit_role)
+            form = ProfileForm(instance=request.user)
+        elif 'add_role' in request.POST:
+            form = ProfileForm(instance=request.user)
+            add_role_form = PersonRoleForm(request.POST)
+            if add_role_form.is_valid():
+                role = add_role_form.save(commit=False)
+                role.client = request.user
+                role.save()
+                messages.success(request, "Rolė pridėta sėkmingai.")
+                return redirect('profile')
+        elif 'delete_role' in request.POST and request.POST.get('delete_role_id'):
+            role = PersonRole.objects.get(id=request.POST.get('delete_role_id'), client=request.user)
+            role.delete()
+            messages.success(request, "Rolė ištrinta sėkmingai.")
+            return redirect('profile')
+
+        # PASSWORD
         elif 'change_password' in request.POST:
             form = ProfileForm(instance=request.user)
             if password_form.is_valid():
@@ -275,16 +325,20 @@ class ProfileView(LoginRequiredMixin, View):
             form = ProfileForm(request.POST, instance=request.user)
             if form.is_valid():
                 form.save()
-                messages.success(request, "PRofilis atnaujintas sėkmingai")
+                messages.success(request, "Profilis atnaujintas sėkmingai")
                 return redirect('profile')
-        tags = EventTag.objects.filter(client=request.user)
+
         return render(request, 'calendar_app/profile.html', {
             'form': form,
             'tags': tags,
+            'roles': roles,
             'edit_tag_id': edit_tag_id,
             'edit_tag_form': edit_tag_form,
+            'edit_role_id': edit_role_id,
+            'edit_role_form': edit_role_form,
             'password_form': password_form,
             'add_tag_form': add_tag_form,
+            'add_role_form': add_role_form,
         })
 
 

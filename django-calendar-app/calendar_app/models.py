@@ -14,9 +14,13 @@ class Client(models.Model):
     @receiver(post_save, sender=User)
     def create_default_tags(sender, instance, created, **kwargs):
         if created:
-            EventTag.objects.create(client=instance, name='Meet', color='#1976d2', is_default=True)
-            EventTag.objects.create(client=instance, name='Reminder', color='#43a047', is_default=True)
-            EventTag.objects.create(client=instance, name='Event', color='#fbc02d', is_default=True)
+            EventTag.objects.create(client=instance, name='Susitikimas', color='#1976d2', is_default=True)
+            EventTag.objects.create(client=instance, name='Priminimas', color='#43a047', is_default=True)
+            EventTag.objects.create(client=instance, name='Skambutis', color='#fbc02d', is_default=True)
+
+            PersonRole.objects.create(client=instance, name='Būsimas', color='#607d8b', is_default=True)
+            PersonRole.objects.create(client=instance, name='Naujas', color='#43a047', is_default=True)
+            PersonRole.objects.create(client=instance, name='Derinama', color='#fbc02d', is_default=True)
 
     
 class Person(models.Model):
@@ -26,6 +30,7 @@ class Person(models.Model):
     phone_number = models.CharField(max_length=15, blank=True)
     email = models.EmailField(blank=True)
     notes = models.TextField(blank=True)
+    role = models.ForeignKey('PersonRole', on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -54,3 +59,13 @@ class Event(models.Model):
         if self.person:
             return f"{self.person} - {self.date} ({self.tag})"
         return f"{self.manual_name} {self.manual_surname} - {self.date} ({self.tag})"
+    
+
+class PersonRole(models.Model):
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='person_roles')
+    name = models.CharField(max_length=30)
+    color = models.CharField(max_length=7, default='#607d8b')
+    is_default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name

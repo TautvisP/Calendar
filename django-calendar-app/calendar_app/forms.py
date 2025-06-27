@@ -1,5 +1,5 @@
 from django import forms
-from .models import Client, Person, Event, EventTag
+from .models import Client, Person, Event, EventTag, PersonRole
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
@@ -34,9 +34,17 @@ class PersonRegistrationForm(forms.ModelForm):
     phone_number = forms.CharField(label='Tel. Nr.', required=False)
     email = forms.EmailField(label='El. paštas', required=False)
     notes = forms.CharField(label='Užrašai', widget=forms.Textarea, required=False)
+    role = forms.ModelChoiceField(queryset=PersonRole.objects.none(), required=False, label="Rolė")
+
     class Meta:
         model = Person
-        fields = ['first_name', 'last_name', 'phone_number', 'email', 'notes']
+        fields = ['first_name', 'last_name', 'phone_number', 'email', 'notes', 'role']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['role'].queryset = PersonRole.objects.filter(client=user)
 
 class EventForm(forms.ModelForm):
     date = forms.DateField(
@@ -73,4 +81,11 @@ class EventTagForm(forms.ModelForm):
     color = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}), label='Spalva')
     class Meta:
         model = EventTag
+        fields = ['name', 'color']
+
+class PersonRoleForm(forms.ModelForm):
+    name = forms.CharField(label='Rolės pavadinimas')
+    color = forms.CharField(widget=forms.TextInput(attrs={'type': 'color'}), label='Spalva')
+    class Meta:
+        model = PersonRole
         fields = ['name', 'color']

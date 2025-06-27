@@ -13,6 +13,7 @@
                     {{ edit_person_form.phone_number.label_tag }} {{ edit_person_form.phone_number }}
                     {{ edit_person_form.email.label_tag }} {{ edit_person_form.email }}
                     {{ edit_person_form.notes.label_tag }} {{ edit_person_form.notes }}
+                    {{ edit_person_form.role.label_tag }} {{ edit_person_form.role }}
                     <input type="hidden" name="edit_person_id" value="{{ person.id }}">
                     <button type="submit" name="save_person">Išsaugoti</button>
                     <a href="{% url 'person_list' %}">Atšaukti</a>
@@ -23,13 +24,22 @@
                     <li><strong>Tel. Nr.:</strong> {{ person.phone_number|default:"—" }}</li>
                     <li><strong>El. Paštas:</strong> {{ person.email|default:"—" }}</li>
                     <li><strong>Užrašai:</strong> {{ person.notes|linebreaksbr|default:"—" }}</li>
+                    <li><strong>Rolė:</strong> 
+                        {% if person.role %}
+                            <span style="background: {{ person.role.color }}; color: #fff; border-radius: 3px; padding: 0 0.5em;">
+                                {{ person.role.name }}
+                            </span>
+                        {% else %}
+                            —
+                        {% endif %}
+                    </li>
                 </ul>
                 <form method="post" style="display:inline;">
                     {% csrf_token %}
                     <input type="hidden" name="edit_person_id" value="{{ person.id }}">
                     <button type="submit" name="edit_person">Redaguoti</button>
                 </form>
-                <form method="post" style="display:inline;" onsubmit="return confirm('Delete this person?');">
+                <form method="post" style="display:inline;" onsubmit="return confirm('Ištrinti šį žmogų?');">
                     {% csrf_token %}
                     <input type="hidden" name="delete_person_id" value="{{ person.id }}">
                     <button type="submit" name="delete_person">Ištrinti</button>

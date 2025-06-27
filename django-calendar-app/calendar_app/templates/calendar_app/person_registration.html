@@ -4,7 +4,12 @@
     <h2>Registruoti Žmogų</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.first_name.label_tag }} {{ form.first_name }}
+        {{ form.last_name.label_tag }} {{ form.last_name }}
+        {{ form.phone_number.label_tag }} {{ form.phone_number }}
+        {{ form.email.label_tag }} {{ form.email }}
+        {{ form.notes.label_tag }} {{ form.notes }}
+        {{ form.role.label_tag }} {{ form.role }}
         <button type="submit">Registruoti</button>
     </form>
 </div>
