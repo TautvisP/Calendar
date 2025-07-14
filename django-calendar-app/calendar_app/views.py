@@ -9,12 +9,18 @@ from django.urls import reverse_lazy
 from .models import Person, Event, EventTag, PersonRole
 from .forms import ClientRegisterForm, PersonRegistrationForm, EventForm, ProfileForm, EventTagForm, CustomPasswordChangeForm, ClientLoginForm, PersonRoleForm
 from django.contrib.auth import login, logout, update_session_auth_hash
+from django.db.models import Q
 
 
 # Person Views
 class PersonListView(LoginRequiredMixin, View):
     def get(self, request):
+        search = request.GET.get('search', '')
         people = Person.objects.filter(client=request.user)
+        if search:
+            people = people.filter(
+                Q(first_name__icontains=search) | Q(last_name__icontains=search)
+            )
         return render(request, 'calendar_app/person_list.html', {
             'people': people,
             'edit_person_id': None,
