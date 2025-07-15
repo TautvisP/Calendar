@@ -138,3 +138,22 @@ This project is a web-based calendar and client management system built with Dja
      ```
    - Deploy, then revert to the normal start command and redeploy.
 5. **Access your deployed app at the provided Render URL.**
+
+---
+
+## Visuals
+
+**Calendar page**
+![alt text](image-1.png)
+
+**Event creation page**
+![alt text](image.png)
+
+**Event tag and user role edit page**
+![alt text](image-2.png)
+
+**User list page**
+![alt text](image-3.png)
+
+**User creation page**
+![alt text](image-4.png)
