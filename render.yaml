@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: calendar-django
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn django_calendar_app.wsgi:application
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: False
+    staticPublishPath: staticfiles
